@@ -21,6 +21,9 @@ namespace Presentation
                 .AddEntityFrameworkStores<AirlineDBContext>();
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddScoped(typeof(TicketDBRepository));
+            builder.Services.AddScoped(typeof(FlightDBRepository));
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
