@@ -58,6 +58,7 @@ namespace Presentation.Controllers
             string relativePath = "";
             try
             {
+
                 //Add validation 
                 string filename = Guid.NewGuid() + System.IO.Path.GetExtension(booking.Passport.FileName);
 
@@ -78,16 +79,23 @@ namespace Presentation.Controllers
                 double wholeSalePricePaid = calcPricePaid.WholesalePrice;
                 double calcPrice = wholeSalePricePaid + (wholeSalePricePaid * commissionRate);
 
-                _ticketDBRepository.Book(new Ticket()
+                if (_ticketDBRepository.GetTickets().Where(x => x.Id == booking.Id).Count() == 0)
                 {
-                    Row = booking.Row,
-                    Column = booking.Column,
-                    FlightIdFK = Id,
-                    Passport = relativePath,
-                    PricePaid = calcPrice
-                });
+                    _ticketDBRepository.Book(new Ticket()
+                    {
+                        Row = booking.Row,
+                        Column = booking.Column,
+                        FlightIdFK = Id,
+                        Passport = relativePath,
+                        PricePaid = calcPrice
+                    });
 
-                TempData["message"] = "Ticket Booked Successfully";
+                    TempData["message"] = "Ticket Booked Successfully";
+                }
+                else 
+                {
+                    return RedirectToAction("Index");
+                }
             }
 
             catch 
