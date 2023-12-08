@@ -19,28 +19,36 @@ namespace Presentation.Controllers
 
         public IActionResult Index()
         {
-            IQueryable<Flight> flightsQuery = _flightDBRepository.GetFlights();
+            try
+            {
+                IQueryable<Flight> flightsQuery = _flightDBRepository.GetFlights();
 
-            //To obtain the current date
-            DateTime currentDateTime = DateTime.Now;
+                //To obtain the current date
+                DateTime currentDateTime = DateTime.Now;
 
-            var futureFlights = _flightDBRepository.GetFlights()
-            .Where(flight => flight.DepartureDate > currentDateTime)
-            .OrderBy(flight=> flight.DepartureDate)
-            .ToList();
+                var futureFlights = _flightDBRepository.GetFlights()
+                .Where(flight => flight.DepartureDate > currentDateTime)
+                .OrderBy(flight => flight.DepartureDate)
+                .ToList();
 
-            var display = from Flight in futureFlights
-                          select new ListOfFlightsViewModel()
-                          {
-                              Id = Flight.Id,
-                              Rows = Flight.Rows,
-                              Columns = Flight.Columns,
-                              DepartureDate = Flight.DepartureDate,
-                              ArrivalDate = Flight.ArrivalDate,
-                              CountryFrom = Flight.CountryFrom,
-                              CountryTo = Flight.CountryTo
-                          };
-            return View(display);
+                var display = from Flight in futureFlights
+                              select new ListOfFlightsViewModel()
+                              {
+                                  Id = Flight.Id,
+                                  Rows = Flight.Rows,
+                                  Columns = Flight.Columns,
+                                  DepartureDate = Flight.DepartureDate,
+                                  ArrivalDate = Flight.ArrivalDate,
+                                  CountryFrom = Flight.CountryFrom,
+                                  CountryTo = Flight.CountryTo
+                              };
+                return View(display);
+            }
+            catch(Exception ex)
+            {
+                TempData["error"] = ex.Message;
+                return RedirectToAction("Index","Home");
+            }
         }
 
         [HttpGet]
@@ -79,7 +87,7 @@ namespace Presentation.Controllers
                 double wholeSalePricePaid = calcPricePaid.WholesalePrice;
                 double calcPrice = wholeSalePricePaid + (wholeSalePricePaid * commissionRate);
 
-                if (_ticketDBRepository.GetTickets().Where(x => x.Id == booking.Id).Count() == 0)
+                if (_ticketDBRepository.GetTickets().Any(x => x.FlightIdFK == Id && x.Row == booking.Row && x.Column == booking.Column))
                 {
                     _ticketDBRepository.Book(new Ticket()
                     {
@@ -91,20 +99,17 @@ namespace Presentation.Controllers
                     });
 
                     TempData["message"] = "Ticket Booked Successfully";
+               
                 }
-                else 
-                {
-                    return RedirectToAction("Index");
-                }
-            }
+                return RedirectToAction("Index");
 
-            catch 
+            }
+            catch(Exception ex)
             {
-                booking.Flights = _flightDBRepository.GetFlights();
-                TempData["Error"] = "Ticket was not booked successfully";
+                //booking.Flights = _flightDBRepository.GetFlights();
+                TempData["error"] = "Ticket was not booked successfully";
                 return View(booking);
             }
-            return View(booking);
         }
 
 
