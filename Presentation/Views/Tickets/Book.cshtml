@@ -46,17 +46,14 @@
 
 <h4>BookAFlightTicketViewModel</h4>
 
-
 <form asp-action="Create" enctype="multipart/form-data">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
     <div class="form-group">
-        <label class="control-label">Select a Seat</label>
+        <label class="control-label">Choose a Seat</label>
         <div id="seat-picker" class="seat-picker"></div>
         <input type="hidden" id="selected-row" />
         <input type="hidden" id="selected-column" />
     </div>
-
 </form>
 
 <div>
@@ -82,21 +79,26 @@
 
         function toggleSeat() {
             const seat = this;
-            const seatId = `${seat.dataset.row}-${seat.dataset.column}`;
+            const row = seat.dataset.row;
+            const column = seat.dataset.column;
 
-            if (selectedSeats.has(seatId)) {
-                selectedSeats.delete(seatId);
+            if (selectedSeats.has(seat)) {
+                selectedSeats.delete(seat);
                 seat.classList.remove('selected');
             } else {
-                selectedSeats.add(seatId);
+                for (const selectedSeat of selectedSeats) {
+                    selectedSeat.classList.remove('selected');
+                }
+                selectedSeats.clear();
+
+                selectedSeats.add(seat);
                 seat.classList.add('selected');
             }
 
-            updateFormInputs();
+            updateFormInputs(row, column);
         }
 
-        function updateFormInputs() {
-            const [row, column] = selectedSeats.size ? Array.from(selectedSeats)[0].split('-') : ['', ''];
+        function updateFormInputs(row, column) {
             selectedRowInput.value = row;
             selectedColumnInput.value = column;
         }
@@ -110,45 +112,65 @@
             }
         }
 
-        const seatRows = @Model.Seats?.Rows ?? 0;
-        const seatColumns = @Model.Seats?.Columns ?? 0;
+        const seatRows = @Model.Seats.Rows;
+        const seatColumns = @Model.Seats.Columns;
         createSeatsGrid(seatRows, seatColumns);
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var seatElements = document.querySelectorAll('.seat');
+
+            seatElements.forEach(function (seat) {
+                seat.addEventListener('click', function () {
+                    var selectedRow = seat.getAttribute('data-row');
+                    var selectedColumn = seat.getAttribute('data-column');
+
+                    var selectedRowInput = document.getElementById('selectedRow');
+                    var selectedColumnInput = document.getElementById('selectedColumn');
+
+                    if (selectedRowInput.value === selectedRow && selectedColumnInput.value === selectedColumn) {
+                        selectedRowInput.value = '';
+                        selectedColumnInput.value = '';
+
+                        seat.classList.remove('disabled');
+                    } else {
+                        selectedRowInput.value = selectedRow;
+                        selectedColumnInput.value = selectedColumn;
+
+                        seat.classList.add('selected');
+                    }
+                });
+            });
+        });
     </script>
 }
 
-}
 
-@* @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-} *@
-
-<hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Book" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group">
                 <label asp-for="Row" class="control-label">Selected Row:</label>
-                <input asp-for="Row" class="form-control" id="selected-row" readonly />
+                <input asp-for="Row" class="form-control" id="selectedRow" readonly />
                 <span asp-validation-for="Row" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Column" class="control-label">Selected Column:</label>
-                <input asp-for="Column" class="form-control" id="selected-column" readonly />
+                <input asp-for="Column" class="form-control" id="selectedColumn" readonly />
                 <span asp-validation-for="Column" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label class="control-label">Upload Image of Passport</label>
                 <input type="file" name="Passport" class="form-control" />
-
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Book Ticket" class="btn btn-primary" />
             </div>
         </form>
-
     </div>
 </div>

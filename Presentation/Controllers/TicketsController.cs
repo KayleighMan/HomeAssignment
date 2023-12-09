@@ -40,7 +40,8 @@ namespace Presentation.Controllers
                                   DepartureDate = Flight.DepartureDate,
                                   ArrivalDate = Flight.ArrivalDate,
                                   CountryFrom = Flight.CountryFrom,
-                                  CountryTo = Flight.CountryTo
+                                  CountryTo = Flight.CountryTo,
+                                  retailPrice = Flight.WholesalePrice * Flight.CommissionRate
                               };
                 return View(display);
             }
@@ -63,6 +64,7 @@ namespace Presentation.Controllers
                 Seats = selectedSeat
 
             };
+
 
 
 
@@ -96,24 +98,31 @@ namespace Presentation.Controllers
                 double wholeSalePricePaid = calcPricePaid.WholesalePrice;
                 double calcPrice = wholeSalePricePaid + (wholeSalePricePaid * commissionRate);
 
-                if (_ticketDBRepository.GetTickets().Any(x => x.FlightIdFK == Id && x.Row == booking.Row && x.Column == booking.Column))
+                if (booking.Row <= 0 || booking.Column <= 0)
                 {
-                    _ticketDBRepository.Book(new Ticket()
-                    {
-                        Row = booking.Row,
-                        Column = booking.Column,
-                        FlightIdFK = Id,
-                        Passport = relativePath,
-                        PricePaid = calcPrice
-                    });
-
-                    TempData["message"] = "Ticket Booked Successfully";
-               
+                    TempData["error"] = "Invalid seat or row selection.";
+                    return View(booking);
                 }
-                return RedirectToAction("Index");
+                if (_ticketDBRepository.IsSeatBooked(Id, booking.Row, booking.Column))
+                {
+                    TempData["error"] = "The selected seat is already booked.";
+                    return View(booking);
+                }
 
+                // Book the seat
+                _ticketDBRepository.Book(new Ticket()
+                {
+                    Row = booking.Row,
+                    Column = booking.Column,
+                    FlightIdFK = Id,
+                    Passport = relativePath,
+                    PricePaid = calcPrice
+                });
+
+                TempData["message"] = "Ticket Booked Successfully";
+                return RedirectToAction("Index");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //booking.Flights = _flightDBRepository.GetFlights();
                 TempData["error"] = "Ticket was not booked successfully";

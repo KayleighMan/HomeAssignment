@@ -1,5 +1,6 @@
 ﻿using DataAccess.DataContext;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,11 @@ namespace DataAccess.Repostories
         {
             _AirlineDBContext.Tickets.Add(ticket);
             _AirlineDBContext.SaveChanges();
+        }
+
+        public bool IsSeatBooked(Guid flightId, int row, int column)
+        {
+            return _AirlineDBContext.Tickets.Any(t => t.FlightIdFK == flightId && t.Row == row && t.Column == column);
         }
 
         /*
