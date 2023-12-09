@@ -22,5 +22,7 @@ namespace Presentation.Models.ViewModels
         public double PricePaid { get; set; }
         public bool Cancelled { get; set; }
 
+        public Flight Seats { get; set; }
+
     }
 }

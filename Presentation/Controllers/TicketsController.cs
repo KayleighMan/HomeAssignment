@@ -52,10 +52,19 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public IActionResult Book() 
+        public IActionResult Book(Guid Id) 
         {
             var flights = _flightDBRepository.GetFlights().ToList();
-            BookAFlightTicketViewModel booking = new BookAFlightTicketViewModel(_flightDBRepository);
+
+            var selectedSeat = flights.FirstOrDefault(f => f.Id == Id);
+
+            var booking = new BookAFlightTicketViewModel(_flightDBRepository)
+            {
+                Seats = selectedSeat
+
+            };
+
+
 
             return View(booking);
         }

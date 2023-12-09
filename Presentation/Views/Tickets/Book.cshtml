@@ -4,40 +4,151 @@
     ViewData["Title"] = "Book";
 }
 
+<style>
+    .seat-picker {
+        display: grid;
+        grid-template-columns: repeat(@Model.Seats.Columns, 1fr);
+        gap: 10px;
+    }
+
+    .seat {
+        width: 50px;
+        height: 50px;
+        border: 2px solid #000000;
+        background-color: #F8C8DC;
+        color: #3498db;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+        .seat:hover {
+            background-color: #C1E1C1;
+            color: #fff;
+        }
+
+        .seat.disabled {
+            background-color: #F8C8DC;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .seat.selected {
+            background-color: #097969;
+            color: #fff;
+        }
+</style>
+
 <h1>Book</h1>
 
 <h4>BookAFlightTicketViewModel</h4>
+
+
+<form asp-action="Create" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label class="control-label">Select a Seat</label>
+        <div id="seat-picker" class="seat-picker"></div>
+        <input type="hidden" id="selected-row" />
+        <input type="hidden" id="selected-column" />
+    </div>
+
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section scripts {
+    <script>
+        const seatPicker = document.getElementById('seat-picker');
+        const selectedRowInput = document.getElementById('selected-row');
+        const selectedColumnInput = document.getElementById('selected-column');
+        const selectedSeats = new Set();
+
+        function createSeatElement(row, column) {
+            const seat = document.createElement('div');
+            seat.classList.add('seat');
+            seat.dataset.row = row;
+            seat.dataset.column = column;
+            seat.innerText = `${row}-${column}`;
+            seat.addEventListener('click', toggleSeat);
+            return seat;
+        }
+
+        function toggleSeat() {
+            const seat = this;
+            const seatId = `${seat.dataset.row}-${seat.dataset.column}`;
+
+            if (selectedSeats.has(seatId)) {
+                selectedSeats.delete(seatId);
+                seat.classList.remove('selected');
+            } else {
+                selectedSeats.add(seatId);
+                seat.classList.add('selected');
+            }
+
+            updateFormInputs();
+        }
+
+        function updateFormInputs() {
+            const [row, column] = selectedSeats.size ? Array.from(selectedSeats)[0].split('-') : ['', ''];
+            selectedRowInput.value = row;
+            selectedColumnInput.value = column;
+        }
+
+        function createSeatsGrid(rows, columns) {
+            for (let row = 1; row <= rows; row++) {
+                for (let col = 1; col <= columns; col++) {
+                    const seat = createSeatElement(row, col);
+                    seatPicker.appendChild(seat);
+                }
+            }
+        }
+
+        const seatRows = @Model.Seats?.Rows ?? 0;
+        const seatColumns = @Model.Seats?.Columns ?? 0;
+        createSeatsGrid(seatRows, seatColumns);
+    </script>
+}
+
+}
+
+@* @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+} *@
+
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Book" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Row" class="control-label"></label>
-                <input asp-for="Row" class="form-control" />
+                <label asp-for="Row" class="control-label">Selected Row:</label>
+                <input asp-for="Row" class="form-control" id="selected-row" readonly />
                 <span asp-validation-for="Row" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="Column" class="control-label"></label>
-                <input asp-for="Column" class="form-control" />
+                <label asp-for="Column" class="control-label">Selected Column:</label>
+                <input asp-for="Column" class="form-control" id="selected-column" readonly />
                 <span asp-validation-for="Column" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label  class="control-label">Upload Image of Passport</label>
+                <label class="control-label">Upload Image of Passport</label>
                 <input type="file" name="Passport" class="form-control" />
-                
+
             </div>
             <div class="form-group">
                 <input type="submit" value="Book Ticket" class="btn btn-primary" />
             </div>
         </form>
+
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
