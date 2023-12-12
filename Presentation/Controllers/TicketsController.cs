@@ -101,11 +101,23 @@ namespace Presentation.Controllers
                 if (booking.Row <= 0 || booking.Column <= 0)
                 {
                     TempData["error"] = "Invalid seat or row selection.";
+
+                    var flights = _flightDBRepository.GetFlights().ToList();
+
+                    var selectedSeat = flights.FirstOrDefault(f => f.Id == Id);
+
+                    booking.Seats = selectedSeat;
                     return View(booking);
                 }
                 if (_ticketDBRepository.IsSeatBooked(Id, booking.Row, booking.Column))
                 {
                     TempData["error"] = "The selected seat is already booked.";
+
+                    var flights = _flightDBRepository.GetFlights().ToList();
+
+                    var selectedSeat = flights.FirstOrDefault(f => f.Id == Id);
+
+                    booking.Seats = selectedSeat;
                     return View(booking);
                 }
 
