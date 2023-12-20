@@ -121,23 +121,39 @@ namespace Presentation.Controllers
                     return View(booking);
                 }
 
-                // Book the seat
-                _ticketDBRepository.Book(new Ticket()
+                var passportCheck = _ticketDBRepository.GetTickets().SingleOrDefault(p =>p.PassportNo == booking.PassportNo);
+                if (passportCheck == null)
                 {
-                    Row = booking.Row,
-                    Column = booking.Column,
-                    FlightIdFK = Id,
-                    Passport = relativePath,
-                    PricePaid = calcPrice
-                });
+                    // Book the seat
+                    _ticketDBRepository.Book(new Ticket()
+                    {
+                        Row = booking.Row,
+                        Column = booking.Column,
+                        FlightIdFK = Id,
+                        Passport = relativePath,
+                        PricePaid = calcPrice,
+                        PassportNo = booking.PassportNo
+                    });
 
-                TempData["message"] = "Ticket Booked Successfully";
-                return RedirectToAction("Index");
+                    TempData["message"] = "Ticket Booked Successfully";
+                    return RedirectToAction("Index");
+                }
+                else 
+                {
+                    TempData["error"] = "Passport is already being used";
+                    var flights = _flightDBRepository.GetFlights().ToList();
+                    var selectedSeat = flights.FirstOrDefault(f => f.Id == Id);
+                    booking.Seats = selectedSeat;
+                    return View(booking);
+                }
             }
             catch (Exception ex)
             {
                 //booking.Flights = _flightDBRepository.GetFlights();
                 TempData["error"] = "Ticket was not booked successfully";
+                var flights = _flightDBRepository.GetFlights().ToList();
+                var selectedSeat = flights.FirstOrDefault(f => f.Id == Id);
+                booking.Seats = selectedSeat;
                 return View(booking);
             }
         }

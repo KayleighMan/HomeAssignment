@@ -37,22 +37,22 @@ namespace DataAccess.Repostories
             return _AirlineDBContext.Tickets.Any(t => t.FlightIdFK == flightId && t.Row == row && t.Column == column);
         }
 
-        /*
-        public void Cancel(Ticket ticket) 
+        public void CancelTicket(Guid id)
         {
-            var originalTicket = GetTickets(ticket.Id);
-            if (originalTicket != null)
+            var ticket = _AirlineDBContext.Tickets.SingleOrDefault(x => x.Id == id);
+
+            if (ticket != null)
             {
-                originalTicket.Row = ticket.Row;
-                originalTicket.WholesalePrice = product.WholesalePrice;
-                originalTicket.Price = product.Price;
-                originalTicket.Name = product.Name;
-                originalTicket.Description = product.Description;
-                originalTicket.CategoryFK = product.CategoryFK;
-                originalTicket.Image = product.Image;
-                
+                ticket.Cancelled = true;
+                _AirlineDBContext.SaveChanges();
+
+                Console.WriteLine($"Ticket {id} canceled successfully. Seat released.");
+            }
+            else
+            {
+                Console.WriteLine($"Ticket {id} is not booked.");
             }
         }
-        */
+
     }
 }
