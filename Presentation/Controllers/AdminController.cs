@@ -1,5 +1,6 @@
 ﻿using DataAccess.Repostories;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Models.ViewModels;
 
 namespace Presentation.Controllers
 {
@@ -27,7 +28,19 @@ namespace Presentation.Controllers
 
         public IActionResult ViewTicket()
         {
-            return View();
+            var tickets = _ticketDBRepository.GetTickets().ToList();
+            var viewTicket = tickets.Select(t => new ListTicketsAdminViewModel
+            {
+                Row = t.Row,
+                Column = t.Column,
+                Cancelled = t.Cancelled,
+                PassportNo = t.PassportNo,
+                PricePaid = t.PricePaid
+
+
+            }).ToList();
+
+            return View(viewTicket);
         }
 
 
