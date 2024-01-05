@@ -31,8 +31,10 @@ namespace Presentation.Controllers
             var tickets = _ticketDBRepository.GetTickets().ToList();
             var viewTicket = tickets.Select(t => new ListTicketsAdminViewModel
             {
+                Id = t.Id,
                 Row = t.Row,
                 Column = t.Column,
+                //FlightIdFK = t.FlightIdFK,
                 Cancelled = t.Cancelled,
                 PassportNo = t.PassportNo,
                 PricePaid = t.PricePaid
