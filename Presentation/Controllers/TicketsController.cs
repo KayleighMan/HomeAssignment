@@ -1,4 +1,5 @@
 ﻿using DataAccess.Repostories;
+using Domain.Interface;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol;
@@ -10,10 +11,13 @@ namespace Presentation.Controllers
     {
         private FlightDBRepository _flightDBRepository;
         private TicketDBRepository _ticketDBRepository;
-        public TicketsController(FlightDBRepository flightDBRepository , TicketDBRepository ticketDBRepository) 
+        private ITicketRepository _iticketDBRepository;
+
+        public TicketsController(ITicketRepository iticketDBRepository , FlightDBRepository flightDBRepository , TicketDBRepository ticketDBRepository) 
         {
             _flightDBRepository = flightDBRepository;
             _ticketDBRepository = ticketDBRepository;
+            _iticketDBRepository = iticketDBRepository;
 
         }
 
@@ -125,7 +129,7 @@ namespace Presentation.Controllers
                 if (passportCheck == null)
                 {
                     // Book the seat
-                    _ticketDBRepository.Book(new Ticket()
+                    _iticketDBRepository.Book(new Ticket() //switch to interface to save tickets to JSON file
                     {
                         Row = booking.Row,
                         Column = booking.Column,

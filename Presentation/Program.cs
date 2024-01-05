@@ -2,6 +2,8 @@ using DataAccess.DataContext;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Repostories;
+using Presentation.Controllers;
+using Domain.Interface;
 
 namespace Presentation
 {
@@ -23,6 +25,9 @@ namespace Presentation
 
             builder.Services.AddScoped(typeof(TicketDBRepository));
             builder.Services.AddScoped(typeof(FlightDBRepository));
+
+            string path = builder.Environment.ContentRootPath + "Ticket.json";
+            builder.Services.AddScoped<ITicketRepository, TicketFileRepository>(x => new TicketFileRepository(path));
 
             var app = builder.Build();
 
