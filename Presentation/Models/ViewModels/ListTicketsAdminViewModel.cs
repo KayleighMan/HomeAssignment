@@ -17,7 +17,7 @@ namespace Presentation.Models.ViewModels
         public int Column { get; set; }
 
         public IQueryable<Flight> Flights { get; set; }
-        public int FlightIdFK { get; set; }
+        public Guid FlightIdFK { get; set; }
         public IFormFile Passport { get; set; }
         public string PassportNo { get; set; } 
         public double PricePaid { get; set; }

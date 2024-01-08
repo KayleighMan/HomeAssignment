@@ -1,9 +1,12 @@
 ﻿using DataAccess.Repostories;
+using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Models.ViewModels;
 
 namespace Presentation.Controllers
 {
+    [Authorize]
     public class AdminController : Controller
     {
         private FlightDBRepository _flightDBRepository;
@@ -34,7 +37,7 @@ namespace Presentation.Controllers
                 Id = t.Id,
                 Row = t.Row,
                 Column = t.Column,
-                //FlightIdFK = t.FlightIdFK,
+                FlightIdFK = t.FlightIdFK,
                 Cancelled = t.Cancelled,
                 PassportNo = t.PassportNo,
                 PricePaid = t.PricePaid
@@ -43,6 +46,27 @@ namespace Presentation.Controllers
             }).ToList();
 
             return View(viewTicket);
+        }
+
+        public IActionResult ViewFlight()
+        {
+            var flights = _flightDBRepository.GetFlights().ToList();
+            var viewFlight = flights.Select(Flight => new ListFlightsAdminViewModel
+            {
+                Id = Flight.Id,
+                Rows = Flight.Rows,
+                Columns = Flight.Columns,
+                DepartureDate = Flight.DepartureDate,
+                ArrivalDate = Flight.ArrivalDate,
+                CountryFrom = Flight.CountryFrom,
+                CountryTo = Flight.CountryTo,
+                WholesalePrice = Flight.WholesalePrice,
+                CommissionRate = Flight.CommissionRate,
+                retailPrice = Flight.WholesalePrice * Flight.CommissionRate
+
+            }).ToList();
+
+            return View(viewFlight);
         }
 
 

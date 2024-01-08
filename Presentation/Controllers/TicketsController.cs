@@ -129,7 +129,7 @@ namespace Presentation.Controllers
                 if (passportCheck == null)
                 {
                     // Book the seat
-                    _iticketDBRepository.Book(new Ticket() //switch to interface to save tickets to JSON file
+                    _ticketDBRepository.Book(new Ticket() //switch to interface to save tickets to JSON file
                     {
                         Row = booking.Row,
                         Column = booking.Column,
