@@ -69,9 +69,6 @@ namespace Presentation.Controllers
 
             };
 
-
-
-
             return View(booking);
         }
 
@@ -82,7 +79,18 @@ namespace Presentation.Controllers
             try
             {
 
-                //Add validation 
+                if (booking.Passport == null || booking.Passport.Length == 0) 
+                {
+                    TempData["error"] = "The passport image was not added.";
+
+                    var flights = _flightDBRepository.GetFlights().ToList();
+
+                    var selectedSeat = flights.FirstOrDefault(f => f.Id == Id);
+
+                    booking.Seats = selectedSeat;
+                    return View(booking);
+                }
+
                 string filename = Guid.NewGuid() + System.IO.Path.GetExtension(booking.Passport.FileName);
 
                 string absolutePath = host.WebRootPath + @"\images\" + filename;
@@ -129,7 +137,7 @@ namespace Presentation.Controllers
                 if (passportCheck == null)
                 {
                     // Book the seat
-                    _ticketDBRepository.Book(new Ticket() //switch to interface to save tickets to JSON file
+                    _ticketDBRepository.Book(new Ticket() //switch to interface to save tickets to JSON file use _iticketDBRepository
                     {
                         Row = booking.Row,
                         Column = booking.Column,
